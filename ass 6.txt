@@ -1,0 +1,95 @@
+ass 6
+
+create table old_data(roll int, name varchar(20));
+create table new_data(roll int, name varchar(20));
+insert into old_data values(1, 'ABC');
+insert into old_data values(2, 'PQR');
+insert into old_data values(3, 'LMN');
+insert into old_data values(4, 'XYZ');
+insert into new_data values(3, 'Krushna');
+insert into new_data values(4, 'Yash');
+insert into new_data values(5, 'Vishwa');
+insert into new_data values(6, 'Alok');
+Delimiter $$  
+Drop procedure roll_list() if exist
+Create Procedure roll_list()
+Begin
+	Declare oldRollNo int;
+	Declare newRollNo int;
+	Declare oldName varchar(20);
+	Declare newName varchar(20);
+	Declare done int Default False;
+	Declare c1 CURSOR for select roll,name from old_data;
+	Declare c2 CURSOR for select roll, name from new_data;
+	Declare continue handler for not found set done = true;
+	open c2;
+	loop1 : LOOP
+		Fetch c2 into newRollNo,newName;
+		if done then
+			leave loop1;
+		end if;
+	set done = false;
+	open c1;
+	loop2 : LOOP
+		Fetch c1 into oldRollNo,oldName;
+		if done then
+			leave loop2;
+		end if;
+
+		if oldRollNo = newRollNo then
+			leave loop2;
+		end if;
+	END LOOP;
+	if done then;
+		insert into old_data values(newRollNo, newname);
+	end if;
+	close c1;
+	END LOOP;
+	close c2;
+END;
+$$
+Delimiter ;
+
+(NOTE : IF running in oracle db then :
+
+CREATE OR REPLACE PROCEDURE roll_list AS
+   oldRollNo NUMBER;
+   newRollNo NUMBER;
+   oldName VARCHAR2(20);
+   newName VARCHAR2(20);
+   
+   CURSOR c1 IS SELECT roll, name FROM old_data;
+   CURSOR c2 IS SELECT roll, name FROM new_data;
+BEGIN
+   OPEN c2;
+   LOOP
+      FETCH c2 INTO newRollNo, newName;
+      EXIT WHEN c2%NOTFOUND;
+      
+      OPEN c1;
+      LOOP
+         FETCH c1 INTO oldRollNo, oldName;
+         EXIT WHEN c1%NOTFOUND;
+         
+         IF oldRollNo = newRollNo THEN
+            EXIT;  -- Exit the inner loop if a match is found
+         END IF;
+      END LOOP;
+      
+      IF c1%NOTFOUND THEN
+         -- If no matching oldRollNo was found, insert the new record
+         INSERT INTO old_data VALUES(newRollNo, newName);
+      END IF;
+      
+      CLOSE c1;
+   END LOOP;
+   
+   CLOSE c2;
+END;
+/
+
+call roll_list();
+
+select*from old_data;
+
+	

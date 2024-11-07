@@ -1,0 +1,56 @@
+
+use Employee
+
+//Create collection emp1 using createCollection method:
+db.createCollection("emp1")
+
+//Insert 4 to 5 documents in emp1 collection with fields eno, ename, //address, sal:
+db.emp1.insertMany([
+    { eno: 1, ename: "John", address: "Street A", sal: 6000 },
+    { eno: 2, ename: "Alice", address: "Street B", sal: 12000 },
+    { eno: 3, ename: "Mark", address: "Street C", sal: 5000 },
+    { eno: 4, ename: "Nina", address: "Street D", sal: 18000 },
+    { eno: 5, ename: "Nick", address: "Street E", sal: 4000 }
+])
+
+//Display all documents in emp1:
+db.emp1.find()
+
+//Insert document by creating own ObjectId:
+db.emp1.insertOne({ _id: ObjectId("64b85a75f3c97d9d0e4012b4"), eno: 6, ename: "Bob", address: "Street F", sal: 9000 })
+
+//Display all employees having salary greater than 5000:
+db.emp1.find({ sal: { $gt: 5000 } })
+
+//Display all employees having salary less than 15000:
+db.emp1.find({ sal: { $lt: 15000 } })
+
+//Display all employees having salary greater than 10000 and less than 20000:
+db.emp1.find({ sal: { $gt: 10000, $lt: 20000 } })
+
+//Update salary of all employees by increasing it by 10%:
+db.emp1.updateMany({}, { $mul: { sal: 1.1 } })
+
+//Delete employees having salary less than 5000:
+db.emp1.deleteMany({ sal: { $lt: 5000 } })
+
+//Rename collection emp1 to employee1:
+db.emp1.renameCollection("employee1")
+
+//Display employees whose name starts with 'n':
+db.employee1.find({ ename: { $regex: /^n/i } }).pretty()
+
+//Sort employees by name in ascending order:
+db.employee1.find().sort({ ename: 1 }).pretty()
+
+//Create a new database with the name Employee1:
+use Employee1
+
+//Drop Employee1 database:
+db.dropDatabase()
+
+//Create collection emp1 using insert method:
+db.emp1.insert({ eno: 7, ename: "Leo", address: "Street G", sal: 7000 })
+
+//Drop collection emp1:
+db.emp1.drop

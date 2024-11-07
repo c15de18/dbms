@@ -1,0 +1,182 @@
+
+CREATE TABLE Person (
+    driver_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    address VARCHAR(100)
+);
+
+
+CREATE TABLE Car (
+    license VARCHAR(20) PRIMARY KEY,
+    model VARCHAR(50),
+    year INT
+);
+
+
+CREATE TABLE Accident (
+    report_no INT PRIMARY KEY,
+    date_acc DATE,
+    location VARCHAR(100)
+);
+
+CREATE TABLE Owns (
+    driver_id INT,
+    license VARCHAR(20),
+    PRIMARY KEY (driver_id, license),
+    FOREIGN KEY (driver_id) REFERENCES Person(driver_id),
+    FOREIGN KEY (license) REFERENCES Car(license)
+);
+
+CREATE TABLE Participated (
+    driver_id INT,
+    license VARCHAR(20),
+    report_no INT,
+    damage_amount DECIMAL(10, 2),
+    PRIMARY KEY (driver_id, license, report_no),
+    FOREIGN KEY (driver_id) REFERENCES Person(driver_id),
+    FOREIGN KEY (license) REFERENCES Car(license),
+    FOREIGN KEY (report_no) REFERENCES Accident(report_no)
+);
+
+
+CREATE TABLE Employee (
+    employee_name VARCHAR(50) PRIMARY KEY,
+    street VARCHAR(100),
+    city VARCHAR(50)
+);
+
+
+CREATE TABLE Company (
+    company_name VARCHAR(50) PRIMARY KEY,
+    city VARCHAR(50)
+);
+
+CREATE TABLE Works (
+    employee_name VARCHAR(50),
+    company_name VARCHAR(50),
+    salary DECIMAL(10, 2),
+    PRIMARY KEY (employee_name, company_name),
+    FOREIGN KEY (employee_name) REFERENCES Employee(employee_name),
+    FOREIGN KEY (company_name) REFERENCES Company(company_name)
+);
+
+
+CREATE TABLE Manages (
+    employee_name VARCHAR(50),
+    manager_name VARCHAR(50),
+    PRIMARY KEY (employee_name, manager_name),
+    FOREIGN KEY (employee_name) REFERENCES Employee(employee_name),
+    FOREIGN KEY (manager_name) REFERENCES Employee(employee_name)
+);
+```
+
+INSERT INTO Person (driver_id, name, address) VALUES (1, 'John Doe', '123 Main St, New York');
+INSERT INTO Person (driver_id, name, address) VALUES (2, 'Jane Smith', '456 Oak St, Los Angeles');
+INSERT INTO Person (driver_id, name, address) VALUES (3, 'Robert Brown', '789 Pine St, Chicago');
+INSERT INTO Person (driver_id, name, address) VALUES (4, 'Emily Davis', '101 Maple St, Houston');
+
+
+INSERT INTO Car (license, model, year) VALUES ('ABC123', 'Sedan', 2018);
+INSERT INTO Car (license, model, year) VALUES ('XYZ456', 'SUV', 2020);
+INSERT INTO Car (license, model, year) VALUES ('LMN789', 'Coupe', 2019);
+INSERT INTO Car (license, model, year) VALUES ('DEF012', 'Hatchback', 2017);
+
+
+INSERT INTO Accident (report_no, date_acc, location) VALUES (1001, TO_DATE('2024-01-15', 'YYYY-MM-DD'), 'New York');
+INSERT INTO Accident (report_no, date_acc, location) VALUES (1002, TO_DATE('2024-02-20', 'YYYY-MM-DD'), 'Los Angeles');
+INSERT INTO Accident (report_no, date_acc, location) VALUES (1003, TO_DATE('2024-03-10', 'YYYY-MM-DD'), 'Chicago');
+INSERT INTO Accident (report_no, date_acc, location) VALUES (1004, TO_DATE('2024-04-25', 'YYYY-MM-DD'), 'Houston');
+
+
+INSERT INTO Owns (driver_id, license) VALUES (1, 'ABC123');
+INSERT INTO Owns (driver_id, license) VALUES (2, 'XYZ456');
+INSERT INTO Owns (driver_id, license) VALUES (3, 'LMN789');
+INSERT INTO Owns (driver_id, license) VALUES (4, 'DEF012');
+
+
+INSERT INTO Participated (driver_id, model, report_no, damage_amount) VALUES (1, 'Sedan', 1001, 1500);
+INSERT INTO Participated (driver_id, model, report_no, damage_amount) VALUES (2, 'SUV', 1002, 2000);
+INSERT INTO Participated (driver_id, model, report_no, damage_amount) VALUES (3, 'Coupe', 1003, 1200);
+INSERT INTO Participated (driver_id, model, report_no, damage_amount) VALUES (4, 'Hatchback', 1004, 800);
+
+
+INSERT INTO Employee (employee_name, street, city) VALUES ('Alice Johnson', '22 Oak St', 'San Francisco');
+INSERT INTO Employee (employee_name, street, city) VALUES ('Bob Lee', '33 Pine St', 'Dallas');
+INSERT INTO Employee (employee_name, street, city) VALUES ('Charlie Brown', '44 Elm St', 'Miami');
+INSERT INTO Employee (employee_name, street, city) VALUES ('Diana White', '55 Maple St', 'Seattle');
+
+INSERT INTO Company (company_name, city) VALUES ('TechCorp', 'San Francisco');
+INSERT INTO Company (company_name, city) VALUES ('HealthInc', 'Dallas');
+INSERT INTO Company (company_name, city) VALUES ('AutoWorks', 'Miami');
+INSERT INTO Company (company_name, city) VALUES ('WebSolutions', 'Seattle');
+
+
+INSERT INTO Works (employee_name, company_name, salary) VALUES ('Alice Johnson', 'TechCorp', 95000);
+INSERT INTO Works (employee_name, company_name, salary) VALUES ('Bob Lee', 'HealthInc', 80000);
+INSERT INTO Works (employee_name, company_name, salary) VALUES ('Charlie Brown', 'AutoWorks', 85000);
+INSERT INTO Works (employee_name, company_name, salary) VALUES ('Diana White', 'WebSolutions', 90000);
+
+
+INSERT INTO Manages (employee_name, manager_name) VALUES ('Alice Johnson', 'Bob Lee');
+INSERT INTO Manages (employee_name, manager_name) VALUES ('Charlie Brown', 'Diana White');
+
+### Step 3: Create View
+
+
+CREATE VIEW Employee_Company_View AS
+SELECT employee_name, company_name
+FROM Works;
+
+
+SELECT * FROM Employee_Company_View;
+
+### Step 4: Create Index for Employee & Participated Table
+
+CREATE INDEX works_employee_name_idx ON Works(employee_name);
+
+
+CREATE INDEX participated_driver_report_idx ON Participated(driver_id, report_no);
+
+### Step 5: Create Sequence for Person & Insert Records Using Sequence
+
+
+CREATE SEQUENCE person_seq
+START WITH 100
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+INSERT INTO Person (driver_id, name, address) 
+VALUES (person_seq.NEXTVAL, 'Eva Green', '111 Birch St, Austin');
+
+INSERT INTO Person (driver_id, name, address) 
+VALUES (person_seq.NEXTVAL, 'Frank Harris', '123 Cedar St, Denver');
+
+### Step 6: Create Synonym for Participated and Company Tables
+
+CREATE SYNONYM participated_syn FOR Participated;
+CREATE SYNONYM company_syn FOR Company;
+
+
+SELECT * FROM participated_syn;
+
+
+SELECT * FROM company_syn;
+
+
+### Step 7: Update Record Using Synonym
+
+
+UPDATE participated_syn 
+SET damage_amount = 1800 
+WHERE driver_id = 2 AND report_no = 1002;
+
+
+SELECT * FROM participated_syn WHERE driver_id = 2 AND report_no = 1002;
+
+
+### Step 8: Drop Index from Employee Table
+
+
+DROP INDEX works_employee_name_idx;
+

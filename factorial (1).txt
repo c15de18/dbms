@@ -1,0 +1,34 @@
+code:factorial
+
+SQL> SET SERVEROUTPUT ON;
+SQL> SET VERIFY OFF;
+SQL> Declare
+     num integer;
+     factorial integer := 1;
+     begin
+     num := &num;
+     if num < 0 then
+     raise_application_error(-20001,'factorial is not defined for negative numbers');
+     else
+     for i in 1..num loop
+     factorial := factorial * i;
+     end loop;
+     dbms_output.put_line('The factorial of ' || num || ' is ' || factorial);
+     end if;
+     exception
+     when others then
+     dbms_output.put_line('Error : ' || sqlerrm);
+     end;
+     /
+
+output:
+Enter value for num: -1
+Error : ORA-20001: factorial is not defined for negative numbers
+
+PL/SQL procedure successfully completed.
+
+SQL> /
+Enter value for num: 4
+The factorial of 4 is 24
+
+PL/SQL procedure successfully completed.

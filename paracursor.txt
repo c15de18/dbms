@@ -1,0 +1,42 @@
+All types of cursor
+
+create table o_roll(roll int, name varchar(20));
+create table n_roll(roll int, name varchar(20));
+
+insert into o_roll values(1,'alice');
+insert into o_roll values(2,'bob');
+insert into o_roll values(3,'charlie');
+
+insert into n_roll values(2,'brain');
+insert into n_roll values(3,'chelsi');
+insert into n_roll values(4,'Dan');
+insert into n_roll values(5,'Elon');
+
+declare 
+	cursor new_records(p_roll int) is
+	select roll,name from o_roll
+	where roll = p_roll;
+
+	v_roll number;
+	v_name varchar(20);
+begin
+
+	for record in (select roll,name from n_roll) loop
+		open new_records(record.roll);
+		fetch new_records into v_roll,v_name;
+
+	if new_records%NOTFOUND then
+		insert into o_roll values(record.roll,record.name);
+		DBMS_OUTPUT.PUT_LINE('Inserted Roll No: ' || record.roll || ' Name: ' || record.name);
+
+	else DBMS_OUTPUT.PUT_LINE('Skipped Roll No: ' || record.roll || ' as already exist');
+	
+	end if;
+	close new_records;
+	end loop;
+
+end;
+/call roll_list();
+select*from o_roll;
+
+	

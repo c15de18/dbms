@@ -1,0 +1,178 @@
+-- 1) Create Department Table
+CREATE TABLE Department (
+    deptno INT PRIMARY KEY,
+    dname VARCHAR(50),
+    location VARCHAR(50)
+);
+
+-- 2) Insert Records into Department Table
+INSERT INTO Department (deptno, dname, location) VALUES (10, 'Accounting', 'Mumbai');
+INSERT INTO Department (deptno, dname, location) VALUES (20, 'Research', 'Pune');
+INSERT INTO Department (deptno, dname, location) VALUES (30, 'Sales', 'Nashik');
+INSERT INTO Department (deptno, dname, location) VALUES (40, 'Operations', 'Nagpur');
+
+-- 3) List Department Information
+SELECT * FROM Department;
+
+-- 4) Create Employee Table
+CREATE TABLE Employee (
+    empno INT PRIMARY KEY,
+    ename VARCHAR(50),
+    job VARCHAR(50),
+    mgr INT,
+    joined_date DATE,
+    salary DECIMAL(10, 2),
+    commission DECIMAL(10, 2),
+    deptno INT,
+    address VARCHAR(100),
+    FOREIGN KEY (deptno) REFERENCES Department(deptno)
+);
+
+-- 5) Insert Records into Employee Table with TO_DATE for dates
+INSERT INTO Employee (empno, ename, job, mgr, joined_date, salary, commission, deptno, address)
+VALUES (1001, 'Nilesh Joshi', 'Clerk', 1005, TO_DATE('1995-12-17', 'YYYY-MM-DD'), 2800, 600, 20, 'Nashik');
+
+INSERT INTO Employee (empno, ename, job, mgr, joined_date, salary, commission, deptno, address)
+VALUES (1002, 'Avinash Pawar', 'Salesman', 1003, TO_DATE('1996-02-20', 'YYYY-MM-DD'), 5000, 1200, 30, 'Nagpur');
+
+INSERT INTO Employee (empno, ename, job, mgr, joined_date, salary, commission, deptno, address)
+VALUES (1003, 'Amit Kumar', 'Manager', 1004, TO_DATE('1986-04-02', 'YYYY-MM-DD'), 2000, NULL, 30, 'Pune');
+
+INSERT INTO Employee (empno, ename, job, mgr, joined_date, salary, commission, deptno, address)
+VALUES (1004, 'Nitin Kulkarni', 'President', NULL, TO_DATE('1986-04-19', 'YYYY-MM-DD'), 50000, NULL, 10, 'Mumbai');
+
+INSERT INTO Employee (empno, ename, job, mgr, joined_date, salary, commission, deptno, address)
+VALUES (1005, 'Niraj Sharma', 'Analyst', 1003, TO_DATE('1998-12-03', 'YYYY-MM-DD'), 12000, NULL, 20, 'Satara');
+
+INSERT INTO Employee (empno, ename, job, mgr, joined_date, salary, commission, deptno, address)
+VALUES (1006, 'Pushkar Deshpande', 'Salesman', 1003, TO_DATE('1996-09-01', 'YYYY-MM-DD'), 6500, 1500, 30, 'Pune');
+
+INSERT INTO Employee (empno, ename, job, mgr, joined_date, salary, commission, deptno, address)
+VALUES (1007, 'Sumit Patil', 'Manager', 1004, TO_DATE('1991-05-01', 'YYYY-MM-DD'), 25000, NULL, 20, 'Mumbai');
+
+INSERT INTO Employee (empno, ename, job, mgr, joined_date, salary, commission, deptno, address)
+VALUES (1008, 'Ravi Sawant', 'Analyst', 1007, TO_DATE('1995-11-17', 'YYYY-MM-DD'), 10000, NULL, NULL, 'Amaravati');
+
+-- 6) Display Employee Information with Explicit Column Names
+SELECT empno AS "Employee Number", ename AS "Employee Name", job AS "Job Title", 
+       mgr AS "Manager ID", joined_date AS "Joining Date", salary AS "Salary", 
+       commission AS "Commission", deptno AS "Department Number", address AS "Address"
+FROM Employee;
+
+-- 7) Add Phone Number Column in Employee Table with Default Value and NOT NULL Constraint
+ALTER TABLE Employee 
+ADD phone_number VARCHAR(15) DEFAULT '000-000-0000' NOT NULL;
+
+-- 8) Display Unique Job Titles from Employee Table
+SELECT DISTINCT job FROM Employee;
+
+-- 9) Update Location of Department 40 to 'Bangalore' Instead of 'Nagpur'
+UPDATE Department
+SET location = 'Bangalore'
+WHERE deptno = 40;
+
+-- 10) Delete Record of 'Pushkar Deshpande' from Employee Table
+DELETE FROM Employee
+WHERE ename = 'Pushkar Deshpande';
+
+-- 11) Create Department_Temp Table with Same Structure as Department (No Data)
+CREATE TABLE Department_Temp AS SELECT * FROM Department WHERE 1 = 0;
+
+-- 12) Insert Rows from Department Table into Department_Temp Table
+INSERT INTO Department_Temp
+SELECT * FROM Department;
+
+-- 13) Change Name of Employee with ID 1003 to 'Nikhil Gosavi'
+UPDATE Employee
+SET ename = 'Nikhil Gosavi'
+WHERE empno = 1003;
+
+-- 14) Display Employees with Salary Between 5000 and 20000
+SELECT * FROM Employee
+WHERE salary BETWEEN 5000 AND 20000;
+
+-- 15) Display Employees Excluding Job Title 'Salesman'
+SELECT * FROM Employee
+WHERE job <> 'Salesman';
+
+-- 16) Display Employees with Job Title 'Manager' or 'Analyst' (Using OR and IN Operators)
+SELECT * FROM Employee
+WHERE job = 'Manager' OR job = 'Analyst';
+
+SELECT * FROM Employee
+WHERE job IN ('Manager', 'Analyst');
+
+-- 17) Display Employee Name & Department Number for Departments 10, 20, 30, and 40
+SELECT ename, deptno FROM Employee
+WHERE deptno IN (10, 20, 30, 40);
+
+-- 18) Display Employee Number, Name, Job, and Commission of Employees Without Commission
+SELECT empno, ename, job, commission FROM Employee
+WHERE commission IS NULL;
+
+-- 19) Display Name & Salary of Employees Whose Salary is Not Between 5000 and 10000
+SELECT ename, salary FROM Employee
+WHERE salary NOT BETWEEN 5000 AND 10000;
+
+-- 20) Find Names & Joined Date of Employees Whose Names Start With 'A'
+SELECT ename, joined_date FROM Employee
+WHERE ename LIKE 'A%';
+
+-- 21) Find Names of Employees Having 'i' as the Second Letter in Their Names
+SELECT ename FROM Employee
+WHERE ename LIKE '_i%';
+
+-- 22) Find Employee Number and Name of Employees With Non-NULL Commission
+SELECT empno, ename FROM Employee
+WHERE commission IS NOT NULL;
+
+-- 23) Display All Employee Information in Descending Order of Employee Number
+SELECT * FROM Employee
+ORDER BY empno DESC;
+
+-- 24) Display Minimum, Maximum, Sum & Average Salary of Each Job Type
+SELECT job, MIN(salary) AS "Min Salary", MAX(salary) AS "Max Salary", 
+       SUM(salary) AS "Total Salary", AVG(salary) AS "Average Salary"
+FROM Employee
+GROUP BY job;
+
+-- 25) Display Number of Employees in Each Department
+SELECT deptno, COUNT(*) AS "Employee Count"
+FROM Employee
+GROUP BY deptno;
+
+-- 26) Select Employee Number and Name According to Annual Salary in Ascending Order
+SELECT empno, ename, (salary * 12) AS "Annual Salary"
+FROM Employee
+ORDER BY "Annual Salary" ASC;
+
+-- 27) Find Department Number and Maximum Salary Where Maximum Salary is Greater Than 5000
+SELECT deptno, MAX(salary) AS "Max Salary"
+FROM Employee
+GROUP BY deptno
+HAVING MAX(salary) > 5000;
+
+-- 28) Find All Distinct Column Values From Employee & Department Tables
+SELECT deptno FROM Employee
+UNION
+SELECT deptno FROM Department;
+
+-- 29) Find All Column Values With Duplicates From Employee & Department Tables
+SELECT deptno FROM Employee
+UNION ALL
+SELECT deptno FROM Department;
+
+-- 30) Find All Column Values Common in Both Employee & Department Tables
+SELECT deptno FROM Employee
+INTERSECT
+SELECT deptno FROM Department;
+
+-- 31) Find All Distinct Column Values in Employee Table but Not in Department Table
+SELECT deptno FROM Employee
+EXCEPT
+SELECT deptno FROM Department;
+
+-- 32) Display Number of Employees in Department 30 Who Earn Commission
+SELECT COUNT(*) AS "Commissioned Employees"
+FROM Employee
+WHERE deptno = 30 AND commission IS NOT NULL;

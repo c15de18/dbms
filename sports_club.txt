@@ -1,71 +1,52 @@
-
 use sports_club
 
-db.createCollection("users")
-
+//Create Sample Data in users Collection
 db.users.insertMany([
-  { name: "John", join_date: ISODate("2022-01-15"), sport_preferences: ["Soccer", "Basketball"] },
-  { name: "Alice", join_date: ISODate("2022-02-20"), sport_preferences: ["Tennis", "Football"] },
-  { name: "Bob", join_date: ISODate("2023-03-10"), sport_preferences: ["Basketball", "Tennis"] },
-  { name: "David", join_date: ISODate("2023-04-05"), sport_preferences: ["Soccer", "Football"] },
-  { name: "Nina", join_date: ISODate("2022-12-15"), sport_preferences: ["Tennis", "Basketball"] }
+    { name: "Alice", join_date: new Date("2023-01-15"), sport_preferences: ["Tennis", "Swimming"] },
+    { name: "Bob", join_date: new Date("2023-02-10"), sport_preferences: ["Basketball"] },
+    { name: "Charlie", join_date: new Date("2023-02-22"), sport_preferences: ["Tennis", "Soccer"] },
+    { name: "Daisy", join_date: new Date("2023-03-18"), sport_preferences: ["Badminton"] },
+    { name: "Ethan", join_date: new Date("2023-01-25"), sport_preferences: ["Swimming", "Soccer"] },
+    { name: "Fiona", join_date: new Date("2023-03-01"), sport_preferences: ["Tennis", "Basketball"] }
 ])
 
-
+//Create an Index on sport_preferences
 db.users.createIndex({ sport_preferences: 1 })
 
-
-
+//Create an Index on join_date and sport_preferences:
 db.users.createIndex({ join_date: 1, sport_preferences: 1 })
 
-
+//Return User Names in Upper Case and in Alphabetical Order:
 db.users.aggregate([
-  { $project: { name: { $toUpper: "$name" } } },
-  { $sort: { name: 1 } }
+    {
+        $project: {
+            _id: 0,
+            name: { $toUpper: "$name" }
+        }
+    },
+    { $sort: { name: 1 } }
 ])
 
+//Return User Names Sorted by the Month They Joined:
 db.users.aggregate([
-  { $project: { name: 1, month_joined: { $month: "$join_date" } } },
-  { $sort: { month_joined: 1 } }
+    {
+        $project: {
+            _id: 0,
+            name: 1,
+            join_month: { $month: "$join_date" }
+        }
+    },
+    { $sort: { join_month: 1 } }
 ])
 
-
+//Show How Many People Joined Each Month of the Year:
 db.users.aggregate([
-  { $project: { month_joined: { $month: "$join_date" } } },
-  { $group: { _id: "$month_joined", count: { $sum: 1 } } },
-  { $sort: { _id: 1 } }
+    {
+        $group: {
+            _id: { month: { $month: "$join_date" } },
+            count: { $sum: 1 }
+        }
+    },
+    { $sort: { "_id.month": 1 } }
 ])
 
-### Summary of Operations:
-1. **Create Index on Sport Preferences:**
-   ```js
-   db.users.createIndex({ sport_preferences: 1 })
-   ```
-2. **Create Index on Join Dates and Preferences:**
-   ```js
-   db.users.createIndex({ join_date: 1, sport_preferences: 1 })
-   ```
-3. **Return User Names in Upper Case and Alphabetical Order:**
-   ```js
-   db.users.aggregate([
-     { $project: { name: { $toUpper: "$name" } } },
-     { $sort: { name: 1 } }
-   ])
-   ```
-4. **Return User Names Sorted by the Month They Joined:**
-   ```js
-   db.users.aggregate([
-     { $project: { name: 1, month_joined: { $month: "$join_date" } } },
-     { $sort: { month_joined: 1 } }
-   ])
-   ```
-5. **Show How Many People Joined Each Month of the Year:**
-   ```js
-   db.users.aggregate([
-     { $project: { month_joined: { $month: "$join_date" } } },
-     { $group: { _id: "$month_joined", count: { $sum: 1 } } },
-     { $sort: { _id: 1 } }
-   ])
-   ```
-
-By using these queries, you can manage and analyze the users of a sports club database effectively with MongoDB's aggregation framework.
