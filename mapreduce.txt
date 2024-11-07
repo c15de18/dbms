@@ -1,0 +1,43 @@
+use employee
+
+// Step 2: Create the collection (if needed)
+db.createCollection("computer");
+
+// Step 3: Insert some sample documents
+db.computer.insertMany([
+  { name: "John", role: "Developer", salary: 5000 },
+  { name: "Alice", role: "Manager", salary: 7000 },
+  { name: "Bob", role: "Designer", salary: 4000 },
+  { name: "David", role: "Developer", salary: 6000 }
+]);
+
+// Step 4: Define the map function
+var mapFunction = function() {
+  emit("total", this.salary);  // Emit "total" as the key and salary as the value
+};
+
+// Step 5: Define the reduce function
+var reduceFunction = function(key, values) {
+  return Array.sum(values);  // Sum the salary values for the "total" key
+};
+
+// Step 6: Run the map-reduce operation
+db.computer.mapReduce(
+  mapFunction,
+  reduceFunction,
+  { out: "salaries_output" }
+);
+
+// Step 7: Display the results
+db.salaries_output.find()
+
+
+// Aggregate to sum the salaries
+db.computer.aggregate([
+  {
+    $group: {
+      _id: "total",  // Group all documents under a single key ("total")
+      totalSalary: { $sum: "$salary" }  // Sum the salaries
+    }
+  }
+])
