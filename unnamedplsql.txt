@@ -1,0 +1,49 @@
+ass 4
+
+create table borrower(roll_no int, name varchar(25), dateofissue DATE, name_of_book varchar(25), status varchar(20) );
+create table fine(roll_no int, date_of_return Date, amt int);
+
+insert into borrower values(01, 'Krushna',TO_DATE('02-11-2024','DD-MM-YYYY'),'Harry Potter','I');
+insert into borrower values(02, 'Yash',TO_DATE('29-10-2024','DD-MM-YYYY'),'Dark Matter','I');
+insert into borrower values(03, 'Vishwa',TO_DATE('27-10-2024','DD-MM-YYYY'),'Ends with us','I');
+insert into borrower values(04, 'Shravani',TO_DATE('22-10-2024','DD-MM-YYYY'),'Starts with us','I');
+insert into borrower values(05, 'Gauri',TO_DATE('15-10-2024','DD-MM-YYYY'),'Verity','I');
+
+Declare
+	i_roll_no number;
+	name_of_book varchar(25);
+	no_of_days Number;
+	return_date DATE := TO_DATE(sysdate, 'DD-MM-YYYY');
+	temp Number;
+	doi Date;
+	fine Number;
+	negative_number Exception;
+Begin
+	i_roll_no := &i_roll_no;
+	name_of_book := '&name_of_book';
+	--dbms_output.put_line(return_date);
+	SELECT to_date(borrower.dateofissue,'DD-MM-YYYY')into doi From borrower where 	borrower.roll_no = i_roll_no AND borrower.name_of_book = name_of_book;	no_of_days := return_date-doi; 
+	dbms_output.put_line(no_of_days);
+	if (no_of_days<0) then
+		raise negative_number;
+	end if;
+	if (no_of_days >15 and no_of_days <30) then
+		fine := 5*no_of_days;
+	elsif (no_of_days>30) then
+		temp := no_of_days - 30;
+		fine := 150 + temp*50;
+	end if;
+	dbms_output.put_line(fine);
+	insert into fine values(i_roll_no,return_date,fine);
+	update borrower set status = 'R' where borrower.roll_no = i_roll_no;
+
+Exception 
+	When negative_number then 
+		DBMS_OUTTPUT.PUT_LINE('Negative Number days error');
+
+	When others then 
+		DBMS_OUTPUT.PUT_LINE('Unexpected Error');
+
+End;
+	
+	

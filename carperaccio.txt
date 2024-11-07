@@ -1,0 +1,205 @@
+
+mysql> create database car;
+Query OK, 1 row affected (0.08 sec)
+
+mysql> use car;
+Database changed
+mysql> create table person(
+    -> driver_id int primary key,
+    -> name varchar(50) unique,
+    -> address varchar(50) not null);
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> create table car(
+    -> license varchar(15) primary key,
+    -> model varchar(50),
+    -> year int);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> create table accident(
+    -> report_number int primary key,
+    -> date Date,
+    -> location varchar(100));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> create table owns(
+    -> driver_id int,
+    -> license varchar(15),
+    -> foreign key(driver_id) references person(driver_id),
+    -> foreign key (license) references car(license),
+    -> primary key(driver_id,license));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> create table participated(
+    -> report_number int,
+    -> license varchar(15),
+    -> driver_id int,
+    -> damage_amount decimal(10,2),
+    -> foreign key (report_number) references accident(report_number),
+    -> foreign key (license) references car(license),
+    -> foreign key (driver_id) references person(driver_id),
+    -> primary key (report_number,license,driver_id));
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> Insert into person(driver_id,name,address) values
+    -> (1,'john smith','123 maple st'),
+    -> (2,'alice melon','456 oak st'),
+    -> (3,'allison ray','789 merry st'),
+    -> (4,'jackson clarkson','101 elm st'),
+    -> (5,'jack andrew','121 cedar st');
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> insert into car(license,model,year) values
+    -> ('abc123de','toyota',2015),
+    -> ('abd163de','mazda',2005),
+    -> ('ibd193de','honda',2012),
+    -> ('ipd393de','ford',2022),
+    -> ('kpd399de','chevrolet',2018);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> insert into accident(report_number,date,location) values
+    -> (101,'2009-06-15','downtown'),
+    -> (102,'2011-08-20','suburb'),
+    -> (103,'2015-11-30','highway'),
+    -> (104,'2009-03-10','city center'),
+    -> (105,'2020-01-22','mall');
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> insert into owns(driver_id,license) values
+    -> (1,'abd163de'),
+    -> (2,'abc123de'),
+    -> (3,'kpd399de'),
+    -> (4,'ipd393de'),
+    -> (5,'ibd193de');
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> insert into participated(report_number,license,driver_id,damage_amoun
+t) values
+    -> (101,'abd163de',1,1500),
+    -> (102,'abc123de',2,2000),
+    -> (102,'abc123de',2,2000),
+    -> (103,'kpd399de',3,800),
+    -> (104,'ipd393de',4,900),
+    -> (105,'ibd193de',5,3000);
+ERROR 1062 (23000): Duplicate entry '102-abc123de-2' for key 'participated.PRIMARY'
+mysql> (105,'ibd193de',5,3000);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '105,'ibd193de',5,3000)' at line 1
+mysql> insert into participated(report_number,license,driver_id,damage_amount) values
+    -> (101,'abd163de',1,1500),
+    -> (102,'abc123de',2,2000),
+    -> (103,'kpd399de',3,800),
+    -> (104,'ipd393de',4,900),
+    -> (105,'ibd193de',5,3000);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select count(distinct o.driver_id) as total_people
+    -> from owns o
+    -> join participated pa on o.license = pa.license
+    -> join accident a on pa.report_number = a.report_number
+    -> where year(a.date) = 2009;
++--------------+
+| total_people |
++--------------+
+|            2 |
++--------------+
+1 row in set (0.03 sec)
+
+mysql> insert into accident(report_number,date,location) values
+    -> (106,'2024-01-15','city park');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> delete from owns
+    -> where license in (select license from car where model = 'mazda')
+    -> and driver_id = (select driver_id from person where name = 'john smit
+h');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> describe person;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| driver_id | int         | NO   | PRI | NULL    |       |
+| name      | varchar(50) | YES  | UNI | NULL    |       |
+| address   | varchar(50) | NO   |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+3 rows in set (0.04 sec)
+
+mysql> decribe car;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'decribe car' at line 1
+mysql> describe car;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| license | varchar(15) | NO   | PRI | NULL    |       |
+| model   | varchar(50) | YES  |     | NULL    |       |
+| year    | int         | YES  |     | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+3 rows in set (0.01 sec)
+
+mysql> describe accident;
++---------------+--------------+------+-----+---------+-------+
+| Field         | Type         | Null | Key | Default | Extra |
++---------------+--------------+------+-----+---------+-------+
+| report_number | int          | NO   | PRI | NULL    |       |
+| date          | date         | YES  |     | NULL    |       |
+| location      | varchar(100) | YES  |     | NULL    |       |
++---------------+--------------+------+-----+---------+-------+
+3 rows in set (0.01 sec)
+
+mysql> describe owns;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| driver_id | int         | NO   | PRI | NULL    |       |
+| license   | varchar(15) | NO   | PRI | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+2 rows in set (0.01 sec)
+
+mysql> describe participated;
++---------------+---------------+------+-----+---------+-------+
+| Field         | Type          | Null | Key | Default | Extra |
++---------------+---------------+------+-----+---------+-------+
+| report_number | int           | NO   | PRI | NULL    |       |
+| license       | varchar(15)   | NO   | PRI | NULL    |       |
+| driver_id     | int           | NO   | PRI | NULL    |       |
+| damage_amount | decimal(10,2) | YES  |     | NULL    |       |
++---------------+---------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+mysql> show columns from person;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| driver_id | int         | NO   | PRI | NULL    |       |
+| name      | varchar(50) | YES  | UNI | NULL    |       |
+| address   | varchar(50) | NO   |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> select * from person;
++-----------+------------------+--------------+
+| driver_id | name             | address      |
++-----------+------------------+--------------+
+|         1 | john smith       | 123 maple st |
+|         2 | alice melon      | 456 oak st   |
+|         3 | allison ray      | 789 merry st |
+|         4 | jackson clarkson | 101 elm st   |
+|         5 | jack andrew      | 121 cedar st |
++-----------+------------------+--------------+
+5 rows in set (0.00 sec)
+
+mysql> select * from owns;
++-----------+----------+
+| driver_id | license  |
++-----------+----------+
+|         2 | abc123de |
+|         5 | ibd193de |
+|         4 | ipd393de |
+|         3 | kpd399de |
++-----------+----------+
+4 rows in set (0.00 sec)

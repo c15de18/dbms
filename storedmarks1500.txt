@@ -1,0 +1,78 @@
+CREATE TABLE stud_marks (
+    name VARCHAR2(20),
+    total_marks NUMBER(5)
+);
+
+CREATE TABLE Result (
+    roll_no NUMBER(3) PRIMARY KEY,
+    name VARCHAR2(20),
+    class VARCHAR2(20)
+);
+
+-- Insert data into stud_marks
+INSERT INTO stud_marks VALUES ('Suresh', 995);
+INSERT INTO stud_marks VALUES ('Harish', 865);
+INSERT INTO stud_marks VALUES ('Samart', 920);
+INSERT INTO stud_marks VALUES ('Mohan', 1000);
+INSERT INTO stud_marks VALUES ('Soham', 745);
+
+-- Insert data into Result
+INSERT INTO Result (roll_no, name) VALUES (1, 'Suresh');
+INSERT INTO Result (roll_no, name) VALUES (2, 'Harish');
+INSERT INTO Result (roll_no, name) VALUES (3, 'Samart');
+INSERT INTO Result (roll_no, name) VALUES (4, 'Mohan');
+INSERT INTO Result (roll_no, name) VALUES (5, 'Soham');
+
+CREATE OR REPLACE PROCEDURE proc_grade (
+    p_roll IN NUMBER,
+    p_grade OUT VARCHAR2
+) IS
+    v_marks NUMBER(5);
+BEGIN
+    -- Retrieve total marks for the specified roll number
+    SELECT s.total_marks INTO v_marks
+    FROM stud_marks s
+    JOIN result r ON s.name = r.name
+    WHERE r.roll_no = p_roll;
+
+    -- Determine the grade based on marks
+    IF v_marks >= 990 AND v_marks <= 1500 THEN
+        p_grade := 'Distinction';
+        UPDATE result SET class = 'Distinction' WHERE roll_no = p_roll;
+    ELSIF v_marks >= 900 AND v_marks <= 989 THEN
+        p_grade := 'FirstClass';
+        UPDATE result SET class = 'FirstClass' WHERE roll_no = p_roll;
+    ELSIF v_marks >= 825 AND v_marks <= 899 THEN
+        p_grade := 'SecondClass';
+        UPDATE result SET class = 'SecondClass' WHERE roll_no = p_roll;
+    ELSE
+        p_grade := '--';
+        UPDATE result SET class = '--' WHERE roll_no = p_roll;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE FUNCTION func_grade (p_roll NUMBER) 
+RETURN VARCHAR2 
+IS
+    v_grade VARCHAR2(25);
+BEGIN
+    -- Call the procedure to get the grade
+    proc_grade(p_roll, v_grade);
+
+    -- Return the grade obtained
+    RETURN v_grade;
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Grade for roll_no 1: ' || func_Grade(1));
+    DBMS_OUTPUT.PUT_LINE('Grade for roll_no 2: ' || func_Grade(2));
+    DBMS_OUTPUT.PUT_LINE('Grade for roll_no 3: ' || func_Grade(3));
+    DBMS_OUTPUT.PUT_LINE('Grade for roll_no 4: ' || func_Grade(4));
+    DBMS_OUTPUT.PUT_LINE('Grade for roll_no 5: ' || func_Grade(5));
+END;
+/
+
+-- View the updated Result table
+SELECT * FROM Result;

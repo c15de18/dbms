@@ -1,0 +1,29 @@
+
+SQL> create table areas(radius number,area number);
+
+Table created.
+
+SQL> begin
+  2  for r in 5..9 loop
+  3  declare
+  4  v_area number;
+  5  begin
+  6  v_area := 3.14159*r*r;
+  7  insert into areas(radius,area) values(r,v_area);
+  8  end;
+  9  end loop;
+ 10  commit;
+ 11  end;
+ 12  /
+
+PL/SQL procedure successfully completed.
+
+SQL> select * from areas;
+
+    RADIUS       AREA
+---------- ----------
+         5   78.53975
+         6  113.09724
+         7  153.93791
+         8  201.06176
+         9  254.46879

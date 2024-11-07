@@ -1,0 +1,71 @@
+
+use sports_club
+
+db.createCollection("users")
+
+db.users.insertMany([
+  { name: "John", join_date: ISODate("2022-01-15"), sport_preferences: ["Soccer", "Basketball"] },
+  { name: "Alice", join_date: ISODate("2022-02-20"), sport_preferences: ["Tennis", "Football"] },
+  { name: "Bob", join_date: ISODate("2023-03-10"), sport_preferences: ["Basketball", "Tennis"] },
+  { name: "David", join_date: ISODate("2023-04-05"), sport_preferences: ["Soccer", "Football"] },
+  { name: "Nina", join_date: ISODate("2022-12-15"), sport_preferences: ["Tennis", "Basketball"] }
+])
+
+
+db.users.createIndex({ sport_preferences: 1 })
+
+
+
+db.users.createIndex({ join_date: 1, sport_preferences: 1 })
+
+
+db.users.aggregate([
+  { $project: { name: { $toUpper: "$name" } } },
+  { $sort: { name: 1 } }
+])
+
+db.users.aggregate([
+  { $project: { name: 1, month_joined: { $month: "$join_date" } } },
+  { $sort: { month_joined: 1 } }
+])
+
+
+db.users.aggregate([
+  { $project: { month_joined: { $month: "$join_date" } } },
+  { $group: { _id: "$month_joined", count: { $sum: 1 } } },
+  { $sort: { _id: 1 } }
+])
+
+### Summary of Operations:
+1. **Create Index on Sport Preferences:**
+   ```js
+   db.users.createIndex({ sport_preferences: 1 })
+   ```
+2. **Create Index on Join Dates and Preferences:**
+   ```js
+   db.users.createIndex({ join_date: 1, sport_preferences: 1 })
+   ```
+3. **Return User Names in Upper Case and Alphabetical Order:**
+   ```js
+   db.users.aggregate([
+     { $project: { name: { $toUpper: "$name" } } },
+     { $sort: { name: 1 } }
+   ])
+   ```
+4. **Return User Names Sorted by the Month They Joined:**
+   ```js
+   db.users.aggregate([
+     { $project: { name: 1, month_joined: { $month: "$join_date" } } },
+     { $sort: { month_joined: 1 } }
+   ])
+   ```
+5. **Show How Many People Joined Each Month of the Year:**
+   ```js
+   db.users.aggregate([
+     { $project: { month_joined: { $month: "$join_date" } } },
+     { $group: { _id: "$month_joined", count: { $sum: 1 } } },
+     { $sort: { _id: 1 } }
+   ])
+   ```
+
+By using these queries, you can manage and analyze the users of a sports club database effectively with MongoDB's aggregation framework.

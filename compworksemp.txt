@@ -1,0 +1,220 @@
+Here’s a complete example to create the tables, insert values, and answer the specified questions step by step using SQL queries. 
+
+This example assumes you're working with MySQL or a similar SQL database.
+
+### Step 1: Create Tables with Necessary Constraints
+
+```sql
+-- Create Employee Table
+CREATE TABLE Employee (
+    employee_name VARCHAR(50) PRIMARY KEY,
+    street VARCHAR(50),
+    city VARCHAR(50)
+);
+
+-- Create Works Table
+CREATE TABLE Works (
+    employee_name VARCHAR(50),
+    company_name VARCHAR(50),
+    salary INT,
+    FOREIGN KEY (employee_name) REFERENCES Employee(employee_name)
+);
+
+-- Create Company Table
+CREATE TABLE Company (
+    company_name VARCHAR(50),
+    city VARCHAR(50)
+);
+
+-- Create Manages Table
+CREATE TABLE Manages (
+    employee_name VARCHAR(50),
+    manager_name VARCHAR(50),
+    FOREIGN KEY (employee_name) REFERENCES Employee(employee_name),
+    FOREIGN KEY (manager_name) REFERENCES Employee(employee_name)
+);
+```
+
+### Step 2: Insert Values into Each Table
+
+#### Insert into `Employee` table
+```sql
+INSERT INTO Employee (employee_name, street, city) VALUES
+    ('John Smith', '123 Maple St', 'Springfield'),
+    ('Alice Johnson', '456 Oak St', 'Riverdale'),
+    ('Bob Brown', '345 Oak St', 'Springfield'),
+    ('David Clark', '789 Birch St', 'Mapleton'),
+    ('Jones', '555 Cedar St', 'Oldtown');
+```
+
+#### Insert into `Works` table
+```sql
+INSERT INTO Works (employee_name, company_name, salary) VALUES
+    ('John Smith', 'First Bank Corporation', 12000),
+    ('Alice Johnson', 'Small Bank Corporation', 9000),
+    ('Bob Brown', 'First Bank Corporation', 15000),
+    ('David Clark', 'Big Bank Corporation', 8000),
+    ('Jones', 'Small Bank Corporation', 5000);
+```
+
+#### Insert into `Company` table
+```sql
+INSERT INTO Company (company_name, city) VALUES
+    ('First Bank Corporation', 'Springfield'),
+    ('Small Bank Corporation', 'Riverdale'),
+    ('Big Bank Corporation', 'Mapleton'),
+    ('Small Bank Corporation', 'Oldtown');
+```
+
+#### Insert into `Manages` table
+```sql
+INSERT INTO Manages (employee_name, manager_name) VALUES
+    ('John Smith', 'Alice Johnson'),
+    ('Bob Brown', 'David Clark'),
+    ('Alice Johnson', 'Jones');
+```
+
+### Step 3: Solve the Questions
+
+#### 1. Find the names of employees who work for "First Bank Corporation."
+
+```sql
+SELECT e.employee_name
+FROM Employee e
+JOIN Works w ON e.employee_name = w.employee_name
+WHERE w.company_name = 'First Bank Corporation';
+```
+
+#### 2. Find the names and cities of residence of all employees who work for "First Bank Corporation."
+
+```sql
+SELECT e.employee_name, e.city
+FROM Employee e
+JOIN Works w ON e.employee_name = w.employee_name
+WHERE w.company_name = 'First Bank Corporation';
+```
+
+#### 3. Find the names, street addresses, and cities of residence of all employees who work for "First Bank Corporation" and earn more than $10,000.
+
+```sql
+SELECT e.employee_name, e.street, e.city
+FROM Employee e
+JOIN Works w ON e.employee_name = w.employee_name
+WHERE w.company_name = 'First Bank Corporation' AND w.salary > 10000;
+```
+
+#### 4. Find all employees who live in the same cities as the companies for which they work.
+
+```sql
+SELECT e.employee_name
+FROM Employee e
+JOIN Works w ON e.employee_name = w.employee_name
+JOIN Company c ON w.company_name = c.company_name
+WHERE e.city = c.city;
+```
+
+#### 5. Find all employees who live in the same cities and on the same streets as their managers.
+
+```sql
+SELECT e.employee_name
+FROM Employee e
+JOIN Manages m ON e.employee_name = m.employee_name
+JOIN Employee mng ON m.manager_name = mng.employee_name
+WHERE e.city = mng.city AND e.street = mng.street;
+```
+
+#### 6. Find all employees who do not work for "First Bank Corporation."
+
+```sql
+SELECT e.employee_name
+FROM Employee e
+JOIN Works w ON e.employee_name = w.employee_name
+WHERE w.company_name <> 'First Bank Corporation';
+```
+
+#### 7. Find all employees who earn more than each employee of "Small Bank Corporation."
+
+```sql
+SELECT e.employee_name
+FROM Works e
+WHERE e.salary > ALL (SELECT salary FROM Works WHERE company_name = 'Small Bank Corporation');
+```
+
+#### 8. Find all companies located in every city in which "Small Bank Corporation" is located.
+
+```sql
+SELECT DISTINCT c1.company_name
+FROM Company c1
+WHERE NOT EXISTS (
+    SELECT c2.city
+    FROM Company c2
+    WHERE c2.company_name = 'Small Bank Corporation'
+    AND c2.city NOT IN (SELECT city FROM Company WHERE company_name = c1.company_name)
+);
+```
+
+#### 9. Find all employees who earn more than the average salary of all employees of their companies.
+
+```sql
+SELECT w.employee_name
+FROM Works w
+JOIN (SELECT company_name, AVG(salary) AS avg_salary
+      FROM Works
+      GROUP BY company_name) AS avg_w
+ON w.company_name = avg_w.company_name
+WHERE w.salary > avg_w.avg_salary;
+```
+
+#### 10. Find the company that has the most employees.
+
+```sql
+SELECT w.company_name
+FROM Works w
+GROUP BY w.company_name
+ORDER BY COUNT(w.employee_name) DESC
+LIMIT 1;
+```
+
+#### 11. Find the company that has the smallest payroll.
+
+```sql
+SELECT w.company_name
+FROM Works w
+GROUP BY w.company_name
+ORDER BY SUM(w.salary) ASC
+LIMIT 1;
+```
+
+#### 12. Find those companies whose employees earn a higher salary, on average, than the average salary at "First Bank Corporation."
+
+```sql
+SELECT w.company_name
+FROM Works w
+GROUP BY w.company_name
+HAVING AVG(w.salary) > (SELECT AVG(salary) FROM Works WHERE company_name = 'First Bank Corporation');
+```
+
+#### 13. Modify the database so that “Jones” now lives in Newtown.
+
+```sql
+UPDATE Employee
+SET city = 'Newtown'
+WHERE employee_name = 'Jones';
+```
+
+#### 14. Give all employees of "First Bank Corporation" a 10% raise.
+
+```sql
+UPDATE Works
+SET salary = salary * 1.1
+WHERE company_name = 'First Bank Corporation';
+```
+
+#### 15. Delete all tuples in the "Works" relation for employees of "Small Bank Corporation."
+
+```sql
+DELETE FROM Works
+WHERE company_name = 'Small Bank Corporation';
+``` 
+
+Each query directly addresses one of the specified questions, providing a complete setup and solution with the necessary data.
