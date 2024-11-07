@@ -1,0 +1,180 @@
+CODE:
+
+CREATE DATABASE ASSIGN1;
+USE ASSIGN1;
+
+-- Create Person table
+CREATE TABLE Person (
+    driver_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    address VARCHAR(255)
+);
+
+-- Create Car table
+CREATE TABLE Car (
+    license VARCHAR(20) PRIMARY KEY,
+    model VARCHAR(50) UNIQUE, 
+    year INT
+);
+
+-- Create Accident table
+CREATE TABLE Accident (
+    report_no INT PRIMARY KEY,
+    date_acc DATE,
+    location VARCHAR(255)
+);
+
+-- Create Owns table (relationship between Person and Car)
+CREATE TABLE Owns (
+    driver_id INT,
+    license VARCHAR(20),
+    PRIMARY KEY (driver_id, license),
+    FOREIGN KEY (driver_id) REFERENCES Person(driver_id),
+    FOREIGN KEY (license) REFERENCES Car(license)
+);
+
+-- Create Participated table (relationship between Person, Car, and Accident)
+CREATE TABLE Participated (
+    driver_id INT,
+    model VARCHAR(50),
+    report_no INT,
+    damage_amount DECIMAL(10, 2),
+    PRIMARY KEY (driver_id, model, report_no),
+    FOREIGN KEY (driver_id) REFERENCES Person(driver_id),
+    FOREIGN KEY (model) REFERENCES Car(model),
+    FOREIGN KEY (report_no) REFERENCES Accident(report_no)
+);
+
+-- Create Employee table
+CREATE TABLE Employee (
+    employee_name VARCHAR(100) UNIQUE,
+    street VARCHAR(255),
+    city VARCHAR(100)
+);
+-- Create Company table
+CREATE TABLE Company (
+    company_name VARCHAR(100) PRIMARY KEY,
+    city VARCHAR(100)
+);
+
+-- Create Works table (relationship between Employee and Company)
+CREATE TABLE Works (
+    employee_name VARCHAR(100),
+    company_name VARCHAR(100),
+    salary DECIMAL(10, 2),
+    PRIMARY KEY (employee_name, company_name),
+    FOREIGN KEY (employee_name) REFERENCES Employee(employee_name),
+    FOREIGN KEY (company_name) REFERENCES Company(company_name)
+);
+
+-- Create Manages table (relationship between Employee and Manager)
+CREATE TABLE Manages (
+    employee_name VARCHAR(100),
+    manager_name VARCHAR(100),
+    PRIMARY KEY (employee_name),
+    FOREIGN KEY (employee_name) REFERENCES Employee(employee_name),
+    FOREIGN KEY (manager_name) REFERENCES Employee(employee_name)
+);
+
+/*create view*/
+-- Create a View for employee_name and company_name from the Works table
+CREATE VIEW Employee_Company_View AS
+SELECT employee_name, company_name
+FROM Works;
+
+-- Create an index on the Employee table (for faster querying on employee_name)
+CREATE INDEX idx_employee_name ON Employee(employee_name);
+
+-- Create an index on the Participated table (for faster querying on driver_id and report_no)
+CREATE INDEX idx_participated_driver_report ON Participated(driver_id, report_no);
+
+-- Create Person table with AUTO_INCREMENT on driver_id
+-- Insert 4 records into the Person table using the sequence
+INSERT INTO Person (name, address) VALUES ('John Doe', '123 Elm St');
+INSERT INTO Person (name, address) VALUES ('Jane Smith', '456 Oak Ave');
+INSERT INTO Person (name, address) VALUES ('Bob Johnson', '789 Pine Rd');
+INSERT INTO Person (name, address) VALUES ('Alice Brown', '101 Maple Dr');
+
+-- Create a view (as sysnonym doesnt supports mysql now)to act as a synonym for the Participated table
+CREATE VIEW Participated_Synonym AS
+SELECT * FROM Participated;
+
+CREATE VIEW Company_Synonym AS
+SELECT * FROM company;
+
+-- Display Records Using view
+-- Select data using the view
+SELECT * FROM Participated_Synonym;
+
+-- Update data using the view (this will update the original Participated table)
+UPDATE Participated_Synonym
+SET damage_amount = 5000
+WHERE driver_id = 1 AND model = 'Sedan' AND report_no = 101;
+
+-- Update data using the view (this will update the original company table)
+UPDATE Company_Synonym
+SET city = 'San Francisco'
+WHERE company_name = 'Tech Innovators';
+
+-- Drop the index from the Employee table
+DROP INDEX idx_employee_name ON Employee;
+
+select * from Employee;
+
+
+
+EXPLANATION:
+Here’s an elaborated explanation of the code:
+
+### 1. **Database Setup**
+- **`CREATE DATABASE ASSIGN1`**: Creates a new database named `ASSIGN1`.
+- **`USE ASSIGN1`**: Selects the `ASSIGN1` database to work with.
+
+### 2. **Table Creation**
+- **`Person`**: This table holds details about individuals (e.g., `driver_id`, `name`, and `address`), where `driver_id` is the primary key.
+- **`Car`**: Contains information about cars (e.g., `license`, `model`, `year`). The `license` is the primary key, and `model` has a unique constraint to avoid duplicate entries.
+- **`Accident`**: Stores accident details like the report number (`report_no`), the accident date (`date_acc`), and location (`location`).
+  
+- **`Owns`**: A relationship table that connects `Person` and `Car` through `driver_id` and `license`. This indicates which person owns which car.
+  
+- **`Participated`**: Connects `Person`, `Car`, and `Accident` by storing information about which driver, in which car, participated in which accident. The primary key is a combination of `driver_id`, `model`, and `report_no`.
+
+- **`Employee`**: Holds employee details, including the name, street, and city.
+  
+- **`Company`**: Contains company details (`company_name`, `city`), with `company_name` as the primary key.
+  
+- **`Works`**: A relationship table that connects employees with companies and stores salary information. The primary key is a combination of `employee_name` and `company_name`.
+
+- **`Manages`**: Connects employees to their managers. Each employee has one manager, and this relationship is modeled through `employee_name` and `manager_name`.
+
+### 3. **Views and Indexes**
+- **Views**:
+  - **`Employee_Company_View`**: Simplifies querying by showing `employee_name` and `company_name` from the `Works` table.
+  - **`Participated_Synonym`**: Acts as a synonym for the `Participated` table to make it easier to query.
+  - **`Company_Synonym`**: A synonym for the `Company` table, simplifying queries related to company data.
+  
+- **Indexes**:
+  - **`idx_employee_name`**: Created on the `Employee` table to speed up queries searching for employees by name.
+  - **`idx_participated_driver_report`**: Created on the `Participated` table to improve performance when querying by `driver_id` and `report_no`.
+
+### 4. **Data Insertion**
+- **Inserting Data**: 4 records are added into the `Person` table with details like `name` and `address`.
+
+### 5. **CRUD Operations via Views**
+- **Select Data**: Data from the `Participated_Synonym` view is selected to display information about driver participation in accidents.
+- **Update Data**: Updates the `damage_amount` in the `Participated_Synonym` table and the `city` in the `Company_Synonym` table, demonstrating how changes made via views affect the underlying tables.
+
+### 6. **Index Removal**
+- **`DROP INDEX idx_employee_name`**: Removes the index created on the `Employee` table, which might no longer be needed.
+
+### 7. **Final Query**
+- **Select All Employees**: Selects and displays all the records from the `Employee` table to review employee data.
+
+### Purpose of This Schema:
+The schema is designed to model a real-world scenario with entities like people, cars, accidents, employees, and companies, along with their relationships. The key elements include:
+- **Person-Driver and Car Ownership**: Through `Owns`, linking drivers to cars.
+- **Car-Accident Participation**: The `Participated` table connects drivers, cars, and accidents.
+- **Employee-Company Relationship**: Employees are linked to companies via `Works`, and managers are connected through `Manages`.
+- **Views and Indexes**: Views are created to simplify queries, and indexes are added to optimize performance for frequent queries.
+  
+This structure allows for easy querying and modification of the data, simulating a real-world scenario where people, cars, companies, and accidents are interconnected.

@@ -1,0 +1,39 @@
+*Code*:
+
+SQL> create table circlearea(radius int,area int);
+Table created.
+
+SQL> select * from circlearea;
+no rows selected
+
+SQL> edit a1.sql
+
+declare
+r1 circlearea.radius%type;
+cir_area int;
+pi int;
+begin
+r1:=5;
+pi:=3.14;
+for r1 in 5..9
+loop
+cir_area:=pi*(r1*r1);
+insert into circlearea values(r1,cir_area);
+end loop;
+end;
+/
+SQL> @a1.sql
+
+PL/SQL procedure successfully completed.
+
+OUTPUT:
+
+SQL> select * from circlearea;
+
+    RADIUS       AREA
+---------- ----------
+         5         75
+         6        108
+         7        147
+         8        192
+         9        243
